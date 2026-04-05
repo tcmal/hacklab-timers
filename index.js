@@ -3,10 +3,12 @@ import * as http from 'http';
 import * as socketio from 'socket.io';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as mqtt from 'mqtt';
 
 const app = express();
 const server = http.createServer(app);
 const io = new socketio.Server(server);
+const client = mqtt.connect("mqtt://mqtt.hacklab");
 
 const connections = new Set();
 
@@ -111,6 +113,8 @@ app.get('/reset', (req, res) => {
 
   let rawTimestamp = req.query.time || req.query.timestamp;
   applyDelta(res, resetTimer(name, rawTimestamp));
+
+  client.publish("time-since-last/reset-occurred", name);
 });
 
 app.get('/history', (req, res) => {
